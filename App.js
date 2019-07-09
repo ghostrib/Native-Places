@@ -3,11 +3,14 @@ import { StyleSheet, View } from 'react-native';
 
 import UserInput from './src/components/UserInput';
 import PlaceList from './src/components/PlacesList';
+import PlaceDetail from './src/components/PlaceDetail';
+// import placeImage from './src/assets/beautiful-places.jpg';
 
 export default class App extends Component {
   state = {
     text: '',
-    places: []
+    places: [],
+    selectedPlace: null
   };
 
   handleInputChange = text => {
@@ -20,35 +23,68 @@ export default class App extends Component {
         return {
           places: prevState.places.concat({
             key: Math.random().toString(),
-            value: prevState.text
+            name: prevState.text,
+            //image: placeImage
+            image: {
+              uri:
+                'https://img.theculturetrip.com/768x432/wp-content/uploads/2016/03/suspension-bridge-1149942_1280.jpg'
+            }
           })
         };
       });
     }
   };
 
-  deleteItem = key => {
+  handleItemSelected = key => {
     this.setState(prevState => {
       return {
-        places: prevState.places.filter(place => {
-          return place.key !== key;
+        selectedPlace: prevState.places.find(place => {
+          return place.key === key;
         })
       };
     });
   };
 
+  handleItemDeleted = () => {
+    this.setState(prevState => {
+      return {
+        places: prevState.places.filter(place => {
+          return place.key !== prevState.selectedPlace.key;
+        }),
+        selectedPlace: null
+      };
+    });
+  };
+
+  handleModalClose = () => {
+    this.setState({
+      selectedPlace: null
+    });
+  };
+
   render() {
-    const { text, places } = this.state;
-    const { handleInputChange, handleButtonPress, deleteItem } = this;
+    const { text, places, selectedPlace } = this.state;
+    const {
+      handleInputChange,
+      handleButtonPress,
+      handleItemSelected,
+      handleItemDeleted,
+      handleModalClose
+    } = this;
 
     return (
       <View style={styles.container}>
+        <PlaceDetail
+          selectedPlace={selectedPlace}
+          handleItemDeleted={handleItemDeleted}
+          handleModalClose={handleModalClose}
+        />
         <UserInput
           text={text}
           handleInputChange={handleInputChange}
           handleButtonPress={handleButtonPress}
         />
-        <PlaceList places={places} deleteItem={deleteItem} />
+        <PlaceList places={places} handleItemSelected={handleItemSelected} />
       </View>
     );
   }
